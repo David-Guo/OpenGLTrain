@@ -2,6 +2,8 @@
 
 存放Computer graphics 课程的作业练习与一些经典的 OpenGL demo code
 
+*注意！！debug 的时候需要将 glut.dll 文件放到生成的 debug 目录下。*
+
 ## hw1
 
 

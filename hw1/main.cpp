@@ -65,13 +65,15 @@ void light()
 
 	// enable lighting
 	glEnable(GL_LIGHTING);
-	// set light property
-	glEnable(GL_LIGHT0);
+	
+	
 	for (size_t i = 0; i < 2; i++) {
-		glLightfv(GL_LIGHT0, GL_POSITION, globalight->lightList[i].light_position);
-		glLightfv(GL_LIGHT0, GL_DIFFUSE, globalight->lightList[i].light_diffuse);
-		glLightfv(GL_LIGHT0, GL_SPECULAR, globalight->lightList[i].light_specular);
-		glLightfv(GL_LIGHT0, GL_AMBIENT, globalight->lightList[i].light_ambient);
+		// set light property
+		glEnable(GL_LIGHT0 + i);
+		glLightfv(GL_LIGHT0 + i, GL_POSITION, globalight->lightList[i].light_position);
+		glLightfv(GL_LIGHT0 + i, GL_DIFFUSE, globalight->lightList[i].light_diffuse);
+		glLightfv(GL_LIGHT0 + i, GL_SPECULAR, globalight->lightList[i].light_specular);
+		glLightfv(GL_LIGHT0 + i, GL_AMBIENT, globalight->lightList[i].light_ambient);
 	}
 }
 
@@ -168,19 +170,19 @@ void keyboard(unsigned char key, int x, int y)
 		movelr += 30;
 		glutPostRedisplay();
 		break;
-	case 'w':
+/*	case 'w':
 		updown += 20;
 		glutPostRedisplay();
 		break;
 	case 's':
 		updown -= 20;
 		glutPostRedisplay();
-		break;
-	case 'i':
+		break;				*/
+	case 'w':
 		inout  -= 100;
 		glutPostRedisplay();
 		break;
-	case 'o':
+	case 's':
 		inout  += 100;
 		glutPostRedisplay();
 		break;
@@ -198,4 +200,5 @@ void mouseMotion(int x, int y)
 {
 	movelr = mouseX - x;
 	updown = mouseY - y;
+	glutPostRedisplay();
 }
