@@ -11,8 +11,11 @@ scene *globalscene;
 static GLfloat updown = 0.0f;
 static GLfloat movelr = 0.0f;
 static GLfloat inout  = 0.0f;
+static GLfloat ob_updown = 0.0f;
+static GLfloat ob_movelr = 0.0f;
 float mouseX;
 float mouseY;
+float objectMove[3][2] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 
 int windowSize[2];
 
@@ -110,7 +113,8 @@ void display()
 			glRotated(globalscene->mList[i].rotate[0], globalscene->mList[i].rotate[1], 
 				globalscene->mList[i].rotate[2], globalscene->mList[i].rotate[3]);
 			/* 改变作图原点 */
-			glTranslatef(globalscene->mList[i].translate[0], globalscene->mList[i].translate[1], 
+			glTranslatef(globalscene->mList[i].translate[0] - objectMove[i][0], 
+				globalscene->mList[i].translate[1] + objectMove[i][1], 
 				globalscene->mList[i].translate[2]);
 			/* 画出物体 */
 			obj_display(objects[i]);
@@ -186,6 +190,21 @@ void keyboard(unsigned char key, int x, int y)
 		inout  += 100;
 		glutPostRedisplay();
 		break;
+	case '1':
+		objectMove[0][0] = ob_movelr;
+		objectMove[0][1] = ob_updown;
+		glutPostRedisplay();
+		break;
+	case '2':
+		objectMove[1][0] = ob_movelr;
+		objectMove[1][1] = ob_updown;
+		glutPositionWindow;
+		break;
+	case '3':
+		objectMove[2][0] = ob_movelr;
+		objectMove[2][1] = ob_updown;
+		glutPostRedisplay();
+		break;
 	case 27:     exit(0);
 	}
 }
@@ -198,7 +217,7 @@ void mouse(int button, int state, int x, int y)
 
 void mouseMotion(int x, int y)
 {
-	movelr = mouseX - x;
-	updown = mouseY - y;
+	ob_movelr = mouseX - x;
+	ob_updown = mouseY - y;
 	glutPostRedisplay();
 }
