@@ -1,0 +1,7 @@
+eye 9 4 9
+vat 0 2 0
+vup 0 1 0
+fovy 45
+dnear 1
+dfar 1000
+viewport 0 0 800 600

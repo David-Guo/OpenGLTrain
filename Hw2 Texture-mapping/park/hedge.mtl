@@ -1,0 +1,18 @@
+newmtl leaves4
+illum 4
+Kd 0.21 0.32 0.21
+Ka 0.40 0.40 0.40
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 1.00 1.00 1.00
+Ns 0.00
+map_Kd hedge.bmp
+newmtl stems4
+illum 4
+Kd 0.57 0.54 0.51
+Ka 0.40 0.40 0.40
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 1.00 1.00 1.00
+Ns 100.00
+map_Kd hedge.bmp
