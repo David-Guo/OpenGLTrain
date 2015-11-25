@@ -1,0 +1,33 @@
+single-texture Fountain_diffuse.bmp
+model littlefountain.obj 1.0 1.0 1.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0
+single-texture water.png
+model water.obj 1.0 4.0 1.0 45.0 0.0 1.0 0.0 0.0 2.0 0.0
+multi-texture grass.bmp GroundLightMap.bmp
+model groundv2.obj  1.0 1.0 1.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0
+single-texture skybox2048x2048.bmp
+model skybox.obj 1.0 1.0 1.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0
+cube-map EnvXp.bmp EnvXn.bmp EnvYp.bmp EnvYn.bmp EnvZp.bmp EnvZn.bmp
+model gem.obj 1.0 1.0 1.0 0.0 0.0 1.0 0.0 0.0 4.0 0.0
+single-texture hedge.bmp
+model hedge.obj 3.0 1.5 1.0 0.0 0.0 1.0 0.0 0.0 0.0 -3.0
+model hedge.obj 3.0 1.5 1.0 -90.0 0.0 1.0 0.0 3.0 0.0 0.0
+model hedge.obj 3.0 1.5 1.0 90.0 0.0 1.0 0.0 -3.0 0.0 0.0
+model hedge.obj 1.0 1.5 1.0 180.0 0.0 1.0 0.0 2.0 0.0 3.0
+model hedge.obj 1.0 1.5 1.0 180.0 0.0 1.0 0.0 -2.0 0.0 3.0
+single-texture leaves.png
+model leaves.obj 0.5 0.5 0.5 0.0 0.0 1.0 0.0 -5.0 0.0 -5.0
+model leaves.obj 0.5 0.5 0.5 0.0 0.0 1.0 0.0 0.0 0.0 -5.0
+model leaves.obj 0.5 0.5 0.5 0.0 0.0 1.0 0.0 5.0 0.0 -5.0
+model leaves.obj 0.5 0.5 0.5 0.0 0.0 1.0 0.0 -5.0 0.0 0.0
+model leaves.obj 0.5 0.5 0.5 0.0 0.0 1.0 0.0 -5.0 0.0 5.0
+single-texture trunk.jpg
+model trunk.obj 0.5 0.5 0.5 0.0 0.0 1.0 0.0 -5.0 0.0 -5.0
+model trunk.obj 0.5 0.5 0.5 0.0 0.0 1.0 0.0 0.0 0.0 -5.0
+model trunk.obj 0.5 0.5 0.5 0.0 0.0 1.0 0.0 5.0 0.0 -5.0
+model trunk.obj 0.5 0.5 0.5 0.0 0.0 1.0 0.0 -5.0 0.0 0.0
+model trunk.obj 0.5 0.5 0.5 0.0 0.0 1.0 0.0 -5.0 0.0 5.0
+single-texture bush.tga
+model bush.obj 0.02 0.02 0.02 0.0 0.0 1.0 0.0 -2.5 0.0 -5.0
+model bush.obj 0.02 0.02 0.02 0.0 0.0 1.0 0.0 2.5 0.0 -5.0
+model bush.obj 0.02 0.02 0.02 0.0 0.0 1.0 0.0 -5.0 0.0 -2.5
+model bush.obj 0.02 0.02 0.02 0.0 0.0 1.0 0.0 -5.0 0.0 2.5

@@ -60,7 +60,7 @@ public:
 	~scene();
 	scene(const char* scene_file);
 	GLuint Loadtexture(const char* tex_file);
-	//GLint LoadCubemap(char* file_px, char * file_nx, char *file_py, char *file_ny, char *file_pz, char *file_nz);
+	GLint LoadCubemap(char* file_px, char * file_nx, char *file_py, char *file_ny, char *file_pz, char *file_nz);
 };
 
 #endif
