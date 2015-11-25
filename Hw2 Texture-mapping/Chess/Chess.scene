@@ -1,0 +1,38 @@
+single-texture Room.bmp
+model Room.obj 1 1 1 0 0 1 0 0 0 0
+multi-texture Wood.bmp Grid.bmp
+model Chessboard.obj 1 1 1 0 0 1 0 0 0 0
+no-texture
+model King.obj 1 1 1 0 0 1 0 1 0 -7
+model Queen.obj 1 1 1 0 0 1 0 -1 0 -7
+model Bishop.obj 1 1 1 0 0 1 0 3 0 -7
+model Bishop.obj 1 1 1 0 0 1 0 -3 0 -7
+model Knight.obj 1 1 1 180 0 1 0 5 0 -7
+model Knight.obj 1 1 1 180 0 1 0 -5 0 -7
+model Rook.obj 1 1 1 0 0 1 0 7 0 -7
+model Rook.obj 1 1 1 0 0 1 0 -7 0 -7
+model Pawn.obj 1 1 1 0 0 1 0 -7 0 -5
+model Pawn.obj 1 1 1 0 0 1 0 -5 0 -5
+model Pawn.obj 1 1 1 0 0 1 0 -3 0 -5
+model Pawn.obj 1 1 1 0 0 1 0 -1 0 -5
+model Pawn.obj 1 1 1 0 0 1 0 1 0 -5
+model Pawn.obj 1 1 1 0 0 1 0 3 0 -5
+model Pawn.obj 1 1 1 0 0 1 0 5 0 -5
+model Pawn.obj 1 1 1 0 0 1 0 7 0 -5
+cube-map Env_positive_x.bmp Env_negative_x.bmp Env_positive_y.bmp Env_negative_y.bmp Env_positive_z.bmp Env_negative_z.bmp
+model King.obj 1 1 1 0 0 1 0 1 0 7
+model Queen.obj 1 1 1 0 0 1 0 -1 0 7
+model Bishop.obj 1 1 1 0 0 1 0 3 0 7
+model Bishop.obj 1 1 1 0 0 1 0 -3 0 7
+model Knight.obj 1 1 1 0 0 1 0 5 0 7
+model Knight.obj 1 1 1 0 0 1 0 -5 0 7
+model Rook.obj 1 1 1 0 0 1 0 7 0 7
+model Rook.obj 1 1 1 0 0 1 0 -7 0 7
+model Pawn.obj 1 1 1 0 0 1 0 -7 0 5
+model Pawn.obj 1 1 1 0 0 1 0 -5 0 5
+model Pawn.obj 1 1 1 0 0 1 0 -3 0 5
+model Pawn.obj 1 1 1 0 0 1 0 -1 0 5
+model Pawn.obj 1 1 1 0 0 1 0 1 0 5
+model Pawn.obj 1 1 1 0 0 1 0 3 0 5
+model Pawn.obj 1 1 1 0 0 1 0 5 0 5
+model Pawn.obj 1 1 1 0 0 1 0 7 0 5

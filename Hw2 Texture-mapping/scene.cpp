@@ -81,7 +81,7 @@ scene::~scene() {
 }
 
 GLuint scene::Loadtexture(const char* pFilename) {
-	glewInit();
+	
 	FreeImage_Initialise();
 	GLuint texObject = 0;
 	glGenTextures(1, &texObject);
@@ -106,7 +106,7 @@ GLuint scene::Loadtexture(const char* pFilename) {
 }
 
 GLint scene::LoadCubemap(char* file_px, char * file_nx, char *file_py, char *file_ny, char *file_pz, char *file_nz) {
-	glewInit();
+	
 	FreeImage_Initialise();
 	GLuint texObject = 0;
 	glGenTextures(1, &texObject);
@@ -129,22 +129,19 @@ GLint scene::LoadCubemap(char* file_px, char * file_nx, char *file_py, char *fil
 	int iHeight = FreeImage_GetHeight(p32BitsImage0);
 
 	glBindTexture(GL_TEXTURE_CUBE_MAP, texObject);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGB, iWidth, iHeight, 0, GL_RGBA, GL_UNSIGNALED, 
-		(void*)FreeImage_GetBits(p32BitsImage0));
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGB, iWidth, iHeight, 0, GL_RGBA, GL_UNSIGNALED, 
-		(void*)FreeImage_GetBits(p32BitsImage1));
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGB, iWidth, iHeight, 0, GL_RGBA, GL_UNSIGNALED, 
-		(void*)FreeImage_GetBits(p32BitsImage2));
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGB, iWidth, iHeight, 0, GL_RGBA, GL_UNSIGNALED, 
-		(void*)FreeImage_GetBits(p32BitsImage3));
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGB, iWidth, iHeight, 0, GL_RGBA, GL_UNSIGNALED, 
-		(void*)FreeImage_GetBits(p32BitsImage4));
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGB, iWidth, iHeight, 0, GL_RGBA, GL_UNSIGNALED, 
-		(void*)FreeImage_GetBits(p32BitsImage5));
-
-
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	int error3 = glGetError();
+	
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGB, iWidth, iHeight, 0, GL_BGRA, GL_UNSIGNALED, (void*)FreeImage_GetBits(p32BitsImage0));
+	int error1 = glGetError();
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGB, iWidth, iHeight, 0, GL_BGRA, GL_UNSIGNALED, (void*)FreeImage_GetBits(p32BitsImage1));
+	int error2 = glGetError();
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGB, iWidth, iHeight, 0, GL_BGRA, GL_UNSIGNALED, (void*)FreeImage_GetBits(p32BitsImage2));
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGB, iWidth, iHeight, 0, GL_BGRA, GL_UNSIGNALED, (void*)FreeImage_GetBits(p32BitsImage3));
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGB, iWidth, iHeight, 0, GL_BGRA, GL_UNSIGNALED, (void*)FreeImage_GetBits(p32BitsImage4));
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGB, iWidth, iHeight, 0, GL_BGRA, GL_UNSIGNALED, (void*)FreeImage_GetBits(p32BitsImage5));
+	//glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
 	FreeImage_Unload(p32BitsImage0);
 	FreeImage_Unload(p32BitsImage1);

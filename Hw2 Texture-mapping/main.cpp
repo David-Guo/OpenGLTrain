@@ -29,15 +29,19 @@ int main(int argc, char** argv)
 
 	globalview = new view("park.view");
 	globalight = new lightsrc("park.light");
-
+	/* Please set the working dirctory as ./Chess  */
+	//globalview = new view("Chess.view");
+	//globalight = new lightsrc("Chess.light");
 
 	glutInit(&argc, argv);
 	glutInitWindowSize(800, 600);
 	glutInitWindowPosition(0, 0);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-	glutCreateWindow("HW2 Park");
-
+	glutCreateWindow("HW1-2 Park");
+	glewExperimental=FALSE;
+	glewInit();
 	globalscene = new scene("park.scene");
+	//globalscene = new scene("Chess.scene");
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
 	glutMainLoop();
@@ -88,6 +92,7 @@ void obj_display(mesh *object) {
 		for (size_t j=0;j<3;++j)
 		{
 			//textex corrd. 
+			//if (globalscene->mList[i].texWay != 3)
 			glTexCoord2fv(object->tList[object->faceList[i][j].t].ptr);
 			glNormal3fv(object->nList[object->faceList[i][j].n].ptr);
 			glVertex3fv(object->vList[object->faceList[i][j].v].ptr);	
@@ -140,7 +145,6 @@ void display() {
 		glPushMatrix();
 		/* 改变作图原点 */
 		glTranslatef(globalscene->mList[i].translate[0], globalscene->mList[i].translate[1], globalscene->mList[i].translate[2]);
-		
 		/* 旋转变换 */
 		glRotated(globalscene->mList[i].rotate[0], globalscene->mList[i].rotate[1], 
 			globalscene->mList[i].rotate[2], globalscene->mList[i].rotate[3]);
@@ -166,14 +170,19 @@ void setTexture(int i) {
 		obj_display(globalscene->mList[i].obejct);
 		break;
 	case 1:
+		// 必须要开启alpha test 把透明的地方挖空！
+		glEnable(GL_ALPHA_TEST);
+		glAlphaFunc(GL_GREATER, 0.5f);
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, globalscene->mList[i].texObject1);
-		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
-		glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
+		//glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
 		/* 画出物体 */
 		obj_display(globalscene->mList[i].obejct);
 		/* 关闭贴图 */
 		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_ALPHA_TEST);
 		glBindTexture(GL_TEXTURE_2D, 0);
 		break;
 	case 2:
@@ -181,10 +190,14 @@ void setTexture(int i) {
 		glActiveTexture(GL_TEXTURE0);
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, globalscene->mList[i].texObject1);
+		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+		glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
 		//bind texture 1
 		glActiveTexture(GL_TEXTURE1);
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, globalscene->mList[i].texObject2);
+		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+		glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
 
 		/* 画出物体 */
 		{
@@ -236,7 +249,7 @@ void setTexture(int i) {
 		glEnable(GL_TEXTURE_GEN_R);
 		glEnable(GL_TEXTURE_CUBE_MAP);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, globalscene->mList[i].texObject1);
-
+		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		/* 画出物体 */
 		obj_display(globalscene->mList[i].obejct);
 		/* 关闭贴图 */
