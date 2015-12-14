@@ -200,6 +200,7 @@ void setTexture(int i) {
 		glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
 
 		/* 画出物体 */
+		// 两幅贴图的物体，贴图方式有所不同，需要另外完成，画图功能，不能直接调用 obj_display()
 		{
 			int lastMaterial = -1;
 			for(size_t k=0;k < globalscene->mList[i].obejct->fTotal;++k)
