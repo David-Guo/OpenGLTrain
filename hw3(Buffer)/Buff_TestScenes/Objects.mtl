@@ -1,0 +1,32 @@
+newmtl initialShadingGroup
+illum 4
+Ks 0.30 0.30 0.30
+Kd 0.80 0.80 0.30
+Ka 0.20 0.20 0.00
+Ns 16.0
+newmtl initialShadingGroup1
+Ks 0.30 0.30 0.30
+Kd 0.30 0.30 0.30
+Ka 0.30 0.30 0.30
+Tf 1.00 1.00 1.00
+Ns 60.00
+newmtl lambert2SG
+Ks 0.30 0.30 0.30
+Kd 0.80 0.30 0.30
+Ka 0.30 0.00 0.00
+Ns 16.0
+newmtl lambert3SG
+Ks 0.30 0.30 0.30
+Kd 0.50 0.80 0.50
+Ka 0.00 0.30 0.00
+Ns 16.0
+newmtl lambert4SG
+Ks 0.30 0.30 0.30
+Kd 0.50 0.50 0.80
+Ka 0.00 0.00 0.30
+Ns 16.0
+newmtl lambert5SG
+Ks 0.30 0.30 0.30
+Kd 0.70 0.30 0.70
+Ka 0.20 0.00 0.20
+Ns 16.0

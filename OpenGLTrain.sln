@@ -5,6 +5,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hw1", "hw1\hw1.vcxproj", "{
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Hw2 Texture-mapping", "Hw2 Texture-mapping\Hw2 Texture-mapping.vcxproj", "{298CEB74-C72D-4BE8-9C30-B1EC7F42784B}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hw3(Buffer)", "hw3(Buffer)\hw3(Buffer).vcxproj", "{63915E9C-6156-430D-860F-3027491B7419}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -19,6 +21,10 @@ Global
 		{298CEB74-C72D-4BE8-9C30-B1EC7F42784B}.Debug|Win32.Build.0 = Debug|Win32
 		{298CEB74-C72D-4BE8-9C30-B1EC7F42784B}.Release|Win32.ActiveCfg = Release|Win32
 		{298CEB74-C72D-4BE8-9C30-B1EC7F42784B}.Release|Win32.Build.0 = Release|Win32
+		{63915E9C-6156-430D-860F-3027491B7419}.Debug|Win32.ActiveCfg = Debug|Win32
+		{63915E9C-6156-430D-860F-3027491B7419}.Debug|Win32.Build.0 = Debug|Win32
+		{63915E9C-6156-430D-860F-3027491B7419}.Release|Win32.ActiveCfg = Release|Win32
+		{63915E9C-6156-430D-860F-3027491B7419}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
