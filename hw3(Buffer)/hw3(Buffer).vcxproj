@@ -82,12 +82,14 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mesh.cpp" />
     <ClCompile Include="scene.cpp" />
+    <ClCompile Include="Vector3D.cpp" />
     <ClCompile Include="view.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="light.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="scene.h" />
+    <ClInclude Include="Vector3D.h" />
     <ClInclude Include="view.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
