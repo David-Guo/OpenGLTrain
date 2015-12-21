@@ -2,6 +2,9 @@
 #include "view.h"
 #include "light.h"
 #include "glut.h"
+#include "Vector3D.h"
+
+using namespace MathTool;
 
 view *globalview;
 lightsrc *globalight;
@@ -31,7 +34,7 @@ int main(int argc, char** argv)
 	glutInitWindowPosition(0, 0);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_STENCIL);
 	glutCreateWindow("HW3 Buffer");
-	globalscene = new scene("Scene1.scene");
+	globalscene = new scene("Scene2.scene");
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
 	glutKeyboardFunc(keyboard);
@@ -159,12 +162,12 @@ void display() {
 	glEnable(GL_CULL_FACE);	
 	// pass 2. front face stencil update
 	glCullFace(GL_BACK);						// 切掉 back face
-	
+
 	glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);		// 通过z-buff 测试，stencil 值+1
 	shadowPolygon();
 	// pass 3. back face stencil update
 	glCullFace(GL_FRONT);						// 切掉 front face	
-	
+
 	glStencilOp(GL_KEEP, GL_KEEP, GL_DECR);		// 通过z-buff 测试，stencil 值-1
 	shadowPolygon();
 	// 恢复
@@ -173,6 +176,7 @@ void display() {
 	glStencilMask(~0);							// 锁定 stencile 
 	glDisable(GL_CULL_FACE);
 	// pass 4. 
+	// 模板测试为，等于0通过， 深度测试为，相等通过，颜色混合为直接累加
 	glStencilFunc(GL_EQUAL, 0, ~0);
 	glDepthFunc(GL_EQUAL); glBlendFunc(GL_ONE, GL_ONE);
 	light();
@@ -245,7 +249,7 @@ void shadowPolygon(mesh *object) {
 	int lastMaterial = -1;
 	// 只用一盏灯，所以选取 ligthList[0]
 	float *lightPos = globalight->lightList[0].light_position;
-	// i 表示 face 的个数
+	// i 表示 face 的个数， j 表示顶点， k 表示顶点的 xyz 坐标
 	for(size_t i=0;i < object->fTotal;++i)
 	{
 		float distVer[3][3];				// shadowPolygon 远离光源的顶点
@@ -258,18 +262,51 @@ void shadowPolygon(mesh *object) {
 			distVer[j][1] =  6 * object->vList[object->faceList[i][j].v].ptr[1] - 5 * lightPos[1];
 			distVer[j][2] =  6 * object->vList[object->faceList[i][j].v].ptr[2] - 5 * lightPos[2];
 		}
+
+		// face 又 a b c 三个顶点按逆时针方向构成，测试其是正光面，还是背光面
+		float abDirect[3];
+		float acDirect[3];
+		float aToLight[3];
+		for (int k = 0; k < 3; k++)
+		{
+			abDirect[k] = object->vList[object->faceList[i][1].v].ptr[k] - object->vList[object->faceList[i][0].v].ptr[k];
+			acDirect[k] = object->vList[object->faceList[i][2].v].ptr[k] - object->vList[object->faceList[i][1].v].ptr[k];
+			aToLight[k] = lightPos[k] - object->vList[object->faceList[i][0].v].ptr[k];
+		}
+		Vector3D abDireV(abDirect);
+		Vector3D acDireV(acDirect);
+		Vector3D aToLightV(aToLight);
+		//int isFaceLight = aToLightV.Dot(abDireV.Cross(abDirect));
+		// 使用 face 上任意一点的法向量内积上该点到光源的向量
+		Vector3D aNormal(object->nList[object->faceList[i][0].n].ptr);
+		int isFaceLight = aToLightV.Dot(aNormal);
+
 		// 画出 shadowPolygon
 		// 假设三角形的三个顶点为 0 1 2
 		// 下面按照[0 1 dist1 dist0] [1 2 dist2 dist1] [2 3 dist3 dist2] 的方式画多边形
-		for (size_t j=0;j<3;++j)
-		{
-			// GL_POLYGON 必须放在循环内部！
-			glBegin(GL_POLYGON);
-			glVertex3fv(object->vList[object->faceList[i][j].v].ptr);
-			glVertex3fv(distVer[j]);
-			glVertex3fv(distVer[(j + 1)%3]);
-			glVertex3fv(object->vList[object->faceList[i][(j + 1)%3].v].ptr);
-			glEnd();
+		if (isFaceLight >= 0) {
+			for (size_t j=0; j<3; ++j)
+			{
+				// GL_POLYGON 必须放在循环内部！
+				glBegin(GL_POLYGON);
+				glVertex3fv(object->vList[object->faceList[i][j].v].ptr);
+				glVertex3fv(distVer[j]);
+				glVertex3fv(distVer[(j + 1)%3]);
+				glVertex3fv(object->vList[object->faceList[i][(j + 1)%3].v].ptr);
+				glEnd();
+			}
+		}
+		else {  // isFaceLight < 0 背光面
+			for (size_t j=0; j<3; ++j)
+			{
+				// GL_POLYGON 必须放在循环内部！
+				glBegin(GL_POLYGON);
+				glVertex3fv(object->vList[object->faceList[i][j].v].ptr);
+				glVertex3fv(object->vList[object->faceList[i][(j + 1)%3].v].ptr);
+				glVertex3fv(distVer[(j + 1)%3]);
+				glVertex3fv(distVer[j]);
+				glEnd();
+			}
 		}
 	}
 }
