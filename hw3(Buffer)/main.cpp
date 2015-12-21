@@ -15,6 +15,7 @@ int windowSize[2];
 void shadowPolygon(mesh *object);
 void shadowPolygon();
 void drawScene();
+void ambient_light();
 float rot_y = 0.0f;
 float zoom_distance = 0.0f;
 float zoom_unit = 1.0f;
@@ -54,6 +55,27 @@ void light()
 		glLightfv(GL_LIGHT0 + i, GL_POSITION, globalight->lightList[i].light_position);
 		glLightfv(GL_LIGHT0 + i, GL_DIFFUSE, globalight->lightList[i].light_diffuse);
 		glLightfv(GL_LIGHT0 + i, GL_SPECULAR, globalight->lightList[i].light_specular);
+		glLightfv(GL_LIGHT0 + i, GL_AMBIENT, globalight->lightList[i].light_ambient);
+	}
+	//glutSolidCube(1);
+}
+
+void ambient_light()
+{
+	glShadeModel(GL_SMOOTH);
+	// z buffer enable
+	glEnable(GL_DEPTH_TEST);
+	// enable lighting
+	glEnable(GL_LIGHTING);
+	float diffuse[3] = {0, 0, 0};
+	float specular[3] = {0, 0, 0};
+
+	for (size_t i = 0; i < globalight->lTotal; i++) {
+		// set light property
+		glEnable(GL_LIGHT0 + i);
+		glLightfv(GL_LIGHT0 + i, GL_POSITION, globalight->lightList[i].light_position);
+		glLightfv(GL_LIGHT0 + i, GL_DIFFUSE, diffuse);
+		glLightfv(GL_LIGHT0 + i, GL_SPECULAR, specular);
 		glLightfv(GL_LIGHT0 + i, GL_AMBIENT, globalight->lightList[i].light_ambient);
 	}
 	//glutSolidCube(1);
@@ -128,21 +150,23 @@ void display() {
 	// 相机沿着 y 轴旋转 rot_y 度
 	glRotatef(rot_y, 0.0, 1.0, 0.0);
 	// 设置灯光效果
-	light();
+	ambient_light();
 	drawScene();
-	/*
+
 	// 锁定 color buffer and depth buffer
 	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 	glDepthMask(GL_FALSE);
 	glEnable(GL_CULL_FACE);	
 	// pass 2. front face stencil update
 	glCullFace(GL_BACK);						// 切掉 back face
-	shadowPolygon();
+	
 	glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);		// 通过z-buff 测试，stencil 值+1
+	shadowPolygon();
 	// pass 3. back face stencil update
 	glCullFace(GL_FRONT);						// 切掉 front face	
-	shadowPolygon();
+	
 	glStencilOp(GL_KEEP, GL_KEEP, GL_DECR);		// 通过z-buff 测试，stencil 值-1
+	shadowPolygon();
 	// 恢复
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	glDepthMask(GL_TRUE); 
@@ -153,8 +177,8 @@ void display() {
 	glDepthFunc(GL_EQUAL); glBlendFunc(GL_ONE, GL_ONE);
 	light();
 	drawScene();
-	*/
-	
+	glDisable(GL_STENCIL_TEST);
+	glStencilFunc(GL_ALWAYS, 0, ~0);
 	glutSwapBuffers();
 }
 
@@ -232,7 +256,7 @@ void shadowPolygon(mesh *object) {
 			// 光源坐标xyz 减去定点坐标xyz 乘上常数 5 得到
 			distVer[j][0] =  6 * object->vList[object->faceList[i][j].v].ptr[0] - 5 * lightPos[0];
 			distVer[j][1] =  6 * object->vList[object->faceList[i][j].v].ptr[1] - 5 * lightPos[1];
-			distVer[j][2] =  6 * object->vList[object->faceList[i][j].v].ptr[2] - 5 * lightPos[1];
+			distVer[j][2] =  6 * object->vList[object->faceList[i][j].v].ptr[2] - 5 * lightPos[2];
 		}
 		// 画出 shadowPolygon
 		// 假设三角形的三个顶点为 0 1 2
