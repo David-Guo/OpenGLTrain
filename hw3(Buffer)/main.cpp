@@ -19,15 +19,18 @@ void shadowPolygon(mesh *object);
 void shadowPolygon();
 void drawScene();
 void ambient_light();
+void drawShadowScene();
+void depthFeild();
 float rot_y = 0.0f;
 float zoom_distance = 0.0f;
 float zoom_unit = 1.0f;
+float rot_light = 0.0f;
 void keyboard(unsigned char , int, int);
 
 int main(int argc, char** argv)
 {
-	globalview = new view("Scene1.view");
-	globalight = new lightsrc("Scene1.light");
+	globalview = new view("Scene2.view");
+	globalight = new lightsrc("Scene2.light");
 
 	glutInit(&argc, argv);
 	glutInitWindowSize(800, 600);
@@ -36,6 +39,7 @@ int main(int argc, char** argv)
 	glutCreateWindow("HW3 Buffer");
 	globalscene = new scene("Scene2.scene");
 	glutDisplayFunc(display);
+	//glutDisplayFunc(depthFeild);
 	glutReshapeFunc(reshape);
 	glutKeyboardFunc(keyboard);
 	glutMainLoop();
@@ -51,14 +55,28 @@ void light()
 	glEnable(GL_DEPTH_TEST);
 	// enable lighting
 	glEnable(GL_LIGHTING);
+	float *position = globalight->lightList[0].light_position;
 
 	for (size_t i = 0; i < globalight->lTotal; i++) {
 		// set light property
+		glPushMatrix(); 
+		glDisable (GL_LIGHTING);
+		glTranslatef(position[0], position[1], position[2]);
+		glColor3f (1.0f, 1.0f, 0.0f);
+		glutSolidSphere(0.5f, 50.0f, 50.0f);
+		glPopMatrix();
+
+		glPushMatrix();
+		glEnable(GL_LIGHTING);
+		glLoadIdentity();
+		glRotated(rot_light, 0.0, 1.0, 0.0);
 		glEnable(GL_LIGHT0 + i);
 		glLightfv(GL_LIGHT0 + i, GL_POSITION, globalight->lightList[i].light_position);
 		glLightfv(GL_LIGHT0 + i, GL_DIFFUSE, globalight->lightList[i].light_diffuse);
 		glLightfv(GL_LIGHT0 + i, GL_SPECULAR, globalight->lightList[i].light_specular);
 		glLightfv(GL_LIGHT0 + i, GL_AMBIENT, globalight->lightList[i].light_ambient);
+		glPopMatrix();
+
 	}
 	//glutSolidCube(1);
 }
@@ -72,14 +90,27 @@ void ambient_light()
 	glEnable(GL_LIGHTING);
 	float diffuse[3] = {0, 0, 0};
 	float specular[3] = {0, 0, 0};
+	float *position = globalight->lightList[0].light_position;
 
 	for (size_t i = 0; i < globalight->lTotal; i++) {
 		// set light property
+		glPushMatrix(); 
+		glDisable (GL_LIGHTING);
+		glTranslatef(position[0], position[1], position[2]);
+		glColor3f (1.0f, 1.0f, 0.0f);
+		glutSolidSphere(0.5f, 50.0f, 50.0f);
+		glPopMatrix();
+
+		glPushMatrix();
+		glEnable(GL_LIGHTING);
+		glLoadIdentity();
+		glRotated(rot_light, 0.0, 1.0, 0.0);
 		glEnable(GL_LIGHT0 + i);
 		glLightfv(GL_LIGHT0 + i, GL_POSITION, globalight->lightList[i].light_position);
 		glLightfv(GL_LIGHT0 + i, GL_DIFFUSE, diffuse);
 		glLightfv(GL_LIGHT0 + i, GL_SPECULAR, specular);
 		glLightfv(GL_LIGHT0 + i, GL_AMBIENT, globalight->lightList[i].light_ambient);
+		glPopMatrix();
 	}
 	//glutSolidCube(1);
 }
@@ -98,22 +129,37 @@ void keyboard(unsigned char key, int x, int y)
 		/* ad 表示左右移动， ws 表示上下移动相机 */
 	case 'a':
 		rot_y -= 20;
-		glutPostRedisplay();
 		break;
 	case 'd':
 		rot_y += 20;
-		glutPostRedisplay();
 		break;
 	case 'w':
 		zoom_distance  -= zoom_unit;
-		glutPostRedisplay();
 		break;
 	case 's':
 		zoom_distance  += zoom_unit;
-		glutPostRedisplay();
+		break;
+	case 'h':
+		globalight->lightList[0].light_position[0] -= 5;
+		break;
+	case 'j':
+		globalight->lightList[0].light_position[0] += 5;
+		break;
+	case 'k':
+		globalight->lightList[0].light_position[2] -= 5;
+		break;
+	case 'l':
+		globalight->lightList[0].light_position[2] += 5;
+		break;
+	case 'i':
+		rot_light -= 20;
+		break;
+	case 'o':
+		rot_light += 20;
 		break;
 	case 27:     exit(0);
 	}
+	glutPostRedisplay();
 }
 
 void display() {
@@ -152,40 +198,59 @@ void display() {
 	glTranslatef(x * zoom_distance, y * zoom_distance, z * zoom_distance);
 	// 相机沿着 y 轴旋转 rot_y 度
 	glRotatef(rot_y, 0.0, 1.0, 0.0);
-	// 设置灯光效果
-	ambient_light();
-	drawScene();
 
-	// 锁定 color buffer and depth buffer
-	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-	glDepthMask(GL_FALSE);
-	glEnable(GL_CULL_FACE);	
-	// pass 2. front face stencil update
-	glCullFace(GL_BACK);						// 切掉 back face
-
-	glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);		// 通过z-buff 测试，stencil 值+1
-	shadowPolygon();
-	// pass 3. back face stencil update
-	glCullFace(GL_FRONT);						// 切掉 front face	
-
-	glStencilOp(GL_KEEP, GL_KEEP, GL_DECR);		// 通过z-buff 测试，stencil 值-1
-	shadowPolygon();
-	// 恢复
-	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-	glDepthMask(GL_TRUE); 
-	glStencilMask(~0);							// 锁定 stencile 
-	glDisable(GL_CULL_FACE);
-	// pass 4. 
-	// 模板测试为，等于0通过， 深度测试为，相等通过，颜色混合为直接累加
-	glStencilFunc(GL_EQUAL, 0, ~0);
-	glDepthFunc(GL_EQUAL); glBlendFunc(GL_ONE, GL_ONE);
-	light();
-	drawScene();
-	glDisable(GL_STENCIL_TEST);
-	glStencilFunc(GL_ALWAYS, 0, ~0);
+	drawShadowScene();
 	glutSwapBuffers();
 }
 
+void depthFeild() 
+{
+	glClearAccum(0.0, 0.0, 0.0, 0.0);
+	glClear(GL_ACCUM_BUFFER_BIT);
+	
+	for (int i = 0; i < 11; i++)
+	{
+		glClearColor(0.0, 0.0, 0.0, 0.0);
+		glClearDepth(1.0f);
+		glClearStencil(0);
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_STENCIL_TEST);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		glDepthFunc(GL_LEQUAL);				// 没有这一行会出现 bug !!!
+
+		float xOffset = 0.1 * i - 1.0;
+		glViewport(globalview->viewport[0], globalview->viewport[1], globalview->viewport[2], globalview->viewport[3]);
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		gluPerspective(globalview->fovy, (GLfloat)windowSize[0]/(GLfloat)windowSize[1], globalview->dnear, globalview->dfar);
+		// viewing and modeling transformation
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		gluLookAt(	globalview->eye[0] + xOffset, globalview->eye[1] + xOffset, globalview->eye[2],		// eye
+			globalview->vat[0], globalview->vat[1], globalview->vat[2],     // center
+			globalview->vup[0], globalview->vup[1], globalview->vup[2]);    // up
+
+		glMatrixMode(GL_MODELVIEW);
+		// normalize
+		float x = globalview->eye[0] * globalview->eye[0];
+		float y = globalview->eye[1] * globalview->eye[1];
+		float z = globalview->eye[2] * globalview->eye[2];
+		float dist = x + y + z;
+		x = sqrt(x / dist);
+		y = sqrt(y / dist);
+		z = sqrt(z / dist);
+		// 相机距离世界中心变换
+		glTranslatef(x * zoom_distance, y * zoom_distance, z * zoom_distance);
+		// 相机沿着 y 轴旋转 rot_y 度
+		glRotatef(rot_y, 0.0, 1.0, 0.0);
+
+		drawShadowScene();
+		glAccum(GL_ACCUM, 1.0/11.0);
+
+	}
+	glAccum(GL_RETURN, 1.0);
+	glutSwapBuffers();
+}
 
 void drawScene() {
 	for (int i = 0; i < globalscene->mTotla; i++) {
@@ -309,4 +374,39 @@ void shadowPolygon(mesh *object) {
 			}
 		}
 	}
+}
+
+void drawShadowScene() 
+{
+	// 设置灯光效果
+	ambient_light();
+	drawScene();
+
+	// 锁定 color buffer and depth buffer
+	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+	glDepthMask(GL_FALSE);
+	glEnable(GL_CULL_FACE);	
+	// pass 2. front face stencil update
+	glCullFace(GL_BACK);						// 切掉 back face
+
+	glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);		// 通过z-buff 测试，stencil 值+1
+	shadowPolygon();
+	// pass 3. back face stencil update
+	glCullFace(GL_FRONT);						// 切掉 front face	
+
+	glStencilOp(GL_KEEP, GL_KEEP, GL_DECR);		// 通过z-buff 测试，stencil 值-1
+	shadowPolygon();
+	// 恢复
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	glDepthMask(GL_TRUE); 
+	glStencilMask(~0);							// 锁定 stencile 
+	glDisable(GL_CULL_FACE);
+	// pass 4. 
+	// 模板测试为，等于0通过， 深度测试为，相等通过，颜色混合为直接累加
+	glStencilFunc(GL_EQUAL, 0, ~0);
+	glDepthFunc(GL_EQUAL); glBlendFunc(GL_ONE, GL_ONE);
+	light();
+	drawScene();
+	//glDisable(GL_STENCIL_TEST);
+	glStencilFunc(GL_ALWAYS, 0, ~0);
 }

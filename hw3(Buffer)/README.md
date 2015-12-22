@@ -1,14 +1,33 @@
 # 开发日志
 
+目标是使用 `opengl` 实现下面两个目标：
+
+1. 阴影 （shadow volume）
+2. 景深 （depth of field)
+
+## shadow volume
+
 使用 openGL stencil test 产生阴影效果。
 
 最终结果如下所示：
 
 ![](./picture/3.png)
 
-## bug 及其解决
+### 原理与方法
 
-### scene 1 问题
+display 函数作图主要完成下面四个 pass
+
+1. pass. 清空 color depth stencil buffer，只开 ambient，画出场景
+2. pass. 锁住 color depth buffer，stencil test 一律通过，保持 depth test，开启 back face culling，画出所有正光面的 shadow polygon，depth test 测试通过区域 stencil 值+1
+3. pass. 开启front face culling。depth test 测试通过区域 stencil 值-1
+4. pass. 解除 color depth buffer，恢复 diffuse 与 specular，重画场景，设定只有 stencil test == 0 的值可以重新画到 buffer
+
+为了避免 depth buffer 与最近人眼物体的 pixel 深度一样儿无法覆盖，可以先清除 depth buffer，或是设定 depth test 条件为小于等于。
+
+
+### bug 及其解决
+
+#### scene 1 问题
 
 * shadow polygon 产生问题
 
@@ -90,7 +109,7 @@ void ambient_light()
 }
 ```
 
-### scene 2 问题
+#### scene 2 问题
 
 * 有体积物体无法产生阴影问题
 
@@ -107,6 +126,53 @@ void ambient_light()
 效果如下图所示：
 
 ![](./picture/7.png)
+
+
+## depth of feild
+
+这个场景需要实现景深效果：
+
+![](./picture/9.png)
+
+### 原理与方法
+
+实现方法是使用 loop 将摄像机向上下左右各移动1个单位，均分成10份。最后利用 accumle buffer 将所有的画面加权平均得到最终景深效果。
+
+伪代码架构如下：
+
+	
+	display () 
+	{
+		clear accum buffer
+		for {
+		clear color depth buffer
+		move camera
+		draw the scene with shadow
+		glAccum()
+		}
+	glAccum(GL_RETURN, 1.0)
+	}
+
+
+### bug 及解决
+
+* 整个场景都被模糊
+
+![](./picture/8.png)
+
+原因是在调用 `glTranslatef(xOffset, 0, 0)` 时，摄影机聚焦点也会跟着动。
+
+应该在下面的函数中使用 `xOffset`
+
+```c
+gluLookAt(	globalview->eye[0] + xOffset, globalview->eye[1], globalview->eye[2],		// eye
+	globalview->vat[0], globalview->vat[1], globalview->vat[2],     // center
+	globalview->vup[0], globalview->vup[1], globalview->vup[2]);    // up
+```
+
+
+
+
 
 
 
