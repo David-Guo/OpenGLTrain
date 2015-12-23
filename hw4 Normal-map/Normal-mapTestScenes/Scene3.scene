@@ -1,0 +1,2 @@
+shader_textures tile2_n.bmp tile2_d.bmp tile2_s.bmp
+model teapot.obj 1 1 1 0 0 1 0 0 0 0

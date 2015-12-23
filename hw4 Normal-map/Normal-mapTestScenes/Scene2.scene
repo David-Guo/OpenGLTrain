@@ -1,0 +1,2 @@
+shader_textures bubble_n.bmp bubble_d.bmp bubble_s.bmp
+model sphere.obj 1 1 1 0 0 1 0 0 0 0
