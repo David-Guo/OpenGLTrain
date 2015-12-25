@@ -13,7 +13,9 @@ void display();
 void reshape(GLsizei , GLsizei );
 void obj_display(mesh *object);
 int windowSize[2];
-void setTexture(int i);
+float rot_y = 0.0f;
+float rot_x = 0.0f;
+void keyboard(unsigned char , int, int);
 
 int main(int argc, char** argv)
 {
@@ -31,6 +33,7 @@ int main(int argc, char** argv)
 	globalscene = new scene("Scene3.scene");
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
+	glutKeyboardFunc(keyboard);
 	glutMainLoop();
 	delete(globalview);
 	delete(globalight);
@@ -72,7 +75,7 @@ void obj_display() {
 	glBindTexture(GL_TEXTURE_2D, globalscene->mList[0].difTextureId);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
 	glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
-	//bind texture 1
+	//bind texture 2
 	glActiveTexture(GL_TEXTURE2);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, globalscene->mList[0].spcTextureId);
@@ -100,7 +103,6 @@ void obj_display() {
 		for (size_t j=0;j<3;++j)
 		{
 			//textex corrd. 
-			//if (globalscene->mList[i].texWay != 3)
 			glMultiTexCoord2fv(GL_TEXTURE0, object->tList[object->faceList[i][j].t].ptr);
 			glMultiTexCoord2fv(GL_TEXTURE1, object->tList[object->faceList[i][j].t].ptr);
 			glMultiTexCoord2fv(GL_TEXTURE2, object->tList[object->faceList[i][j].t].ptr);
@@ -148,17 +150,53 @@ void display() {
 		/* 改变作图原点 */
 		glTranslatef(globalscene->mList[i].translate[0], globalscene->mList[i].translate[1], globalscene->mList[i].translate[2]);
 		/* 旋转变换 */
+		glRotated(rot_y, 0, 1, 0);
+		glRotated(rot_x, 1, 0, 0);
 		glRotated(globalscene->mList[i].rotate[0], globalscene->mList[i].rotate[1], 
 			globalscene->mList[i].rotate[2], globalscene->mList[i].rotate[3]);
 		/* 缩放 */
 		glScaled(globalscene->mList[i].scale[0], globalscene->mList[i].scale[1], globalscene->mList[i].scale[2]);
 		/* 贴图方式 */
 		obj_display();
-		//obj_display(globalscene->mList[i].obejct);
 
 		glPopMatrix();
 		glFlush();
 	}
 
 	glutSwapBuffers();
+}
+
+void keyboard(unsigned char key, int x, int y)
+{
+	switch (key)
+	{
+		/* ad 表示左右旋转物体， ws 表示上下旋转物体 */
+		/* hj 表示左右移动光源， kl 表示上下移动光源 */
+	case 'a':
+		rot_y -= 60;
+		break;
+	case 'd':
+		rot_y += 60;
+		break;
+	case 'w':
+		rot_x -= 60;
+		break;
+	case 's':
+		rot_x  += 60;
+		break;
+	case 'h':
+		globalight->lightList[0].light_position[0] -= 5;
+		break;
+	case 'j':
+		globalight->lightList[0].light_position[0] += 5;
+		break;
+	case 'k':
+		globalight->lightList[0].light_position[1] -= 5;
+		break;
+	case 'l':
+		globalight->lightList[0].light_position[1] += 5;
+		break;
+	case 27:     exit(0);
+	}
+	glutPostRedisplay();
 }
