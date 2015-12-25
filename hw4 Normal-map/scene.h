@@ -34,9 +34,9 @@ public:
 
 		mesh *obejct;
 
-		int texWay;
-		GLuint texObject1;
-		GLuint texObject2;
+		GLuint ambTextureId;
+		GLuint difTextureId;
+		GLuint spcTextureId;
 
 	public:
 		/* model ¹¹Ôìº¯Êý */
@@ -60,7 +60,6 @@ public:
 	~scene();
 	scene(const char* scene_file);
 	GLuint Loadtexture(const char* tex_file);
-	GLint LoadCubemap(char* file_px, char * file_nx, char *file_py, char *file_ny, char *file_pz, char *file_nz);
 };
 
 #endif

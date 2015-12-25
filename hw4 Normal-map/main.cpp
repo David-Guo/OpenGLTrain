@@ -1,131 +1,164 @@
-#include "ShaderLoader.h"
-#include "mesh.h"
-#include "FreeImage.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include "glew.h"
+#include <direct.h>
+#include "scene.h"
+#include "view.h"
+#include "light.h"
 #include "glut.h"
 
+view *globalview;
+lightsrc *globalight;
+scene *globalscene;
 
-#define		TEX_NUM 1	  //the number of textures you use.
-GLuint		texObject[TEX_NUM];	//texture object
-GLhandleARB	MyShader;
-mesh*		object;
-int			WinW,WinH;
-
-unsigned int LoadTexture(const char* filename);
-void LoadShaders();
-void Display();
-void Reshape(GLsizei , GLsizei );
+void light();
+void display();
+void reshape(GLsizei , GLsizei );
+void obj_display(mesh *object);
+int windowSize[2];
+void setTexture(int i);
 
 int main(int argc, char** argv)
 {
-	object = new mesh("sphere.obj");
+	globalview = new view("Scene3.view");
+	globalight = new lightsrc("Scene3.light");
 
 	glutInit(&argc, argv);
 	glutInitWindowSize(500, 500);
 	glutInitWindowPosition(0, 0);
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-	glutCreateWindow("Shader Use Texture");
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+	glutCreateWindow("HW1-2 Park");
+	glewExperimental=FALSE;
+	glewInit();
 
-	GLenum glew_error;
-	if((glew_error = glewInit()) != GLEW_OK)return -1;
-
-	FreeImage_Initialise();
-	texObject[0] = LoadTexture("world.bmp");
-	FreeImage_DeInitialise();
-
-	LoadShaders();
-
-	glutDisplayFunc(Display);
-	glutReshapeFunc(Reshape);
+	globalscene = new scene("Scene3.scene");
+	glutDisplayFunc(display);
+	glutReshapeFunc(reshape);
 	glutMainLoop();
+	delete(globalview);
+	delete(globalight);
 
-	return 0;
 }
 
-unsigned int LoadTexture(const char* pszFile)
+void light()
 {
-	FIBITMAP* pImage = FreeImage_Load(FreeImage_GetFileType(pszFile, 0), pszFile);
-	FIBITMAP *p32BitsImage = FreeImage_ConvertTo32Bits(pImage);
-	int iWidth = FreeImage_GetWidth(p32BitsImage);
-	int iHeight = FreeImage_GetHeight(p32BitsImage);
+	glShadeModel(GL_SMOOTH);
+	// z buffer enable
+	glEnable(GL_DEPTH_TEST);
+	// enable lighting
+	glEnable(GL_LIGHTING);
 
-	unsigned int iTextureId;
-	glGenTextures(1, &iTextureId);
-	glBindTexture(GL_TEXTURE_2D, iTextureId);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, iWidth, iHeight,
-		0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(p32BitsImage));
-
-	FreeImage_Unload(p32BitsImage);
-	FreeImage_Unload(pImage);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	return iTextureId;
-}
-
-void LoadShaders()
-{
-	MyShader = glCreateProgram();
-	if(MyShader != 0)
-	{
-		ShaderLoad(MyShader, "../UseTexture.vs", GL_VERTEX_SHADER);
-		ShaderLoad(MyShader, "../UseTexture.fs", GL_FRAGMENT_SHADER);
+	for (size_t i = 0; i < globalight->lTotal; i++) {
+		// set light property
+		glEnable(GL_LIGHT0 + i);
+		glLightfv(GL_LIGHT0 + i, GL_POSITION, globalight->lightList[i].light_position);
+		glLightfv(GL_LIGHT0 + i, GL_DIFFUSE, globalight->lightList[i].light_diffuse);
+		glLightfv(GL_LIGHT0 + i, GL_SPECULAR, globalight->lightList[i].light_specular);
+		glLightfv(GL_LIGHT0 + i, GL_AMBIENT, globalight->lightList[i].light_ambient);
 	}
 }
 
-void Display()
-{
-	// projection transformation
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(45.0, (GLfloat)WinW/(GLfloat)WinH, 1.0, 1000.0);
-	// viewing and modeling transformation
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	gluLookAt(0.0, 0.0, 10.0,     // eye
-		0.0, 0.0, 0.0,     // center
-		0.0, 1.0, 0.0);    // up
 
-	// clear the buffer
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);      //睲埃ノcolor
-	glClearDepth(1.0f);                        // Depth Buffer (碞琌z buffer) Setup
-	glEnable(GL_DEPTH_TEST);                   // Enables Depth Testing
-	glDepthFunc(GL_LEQUAL);                    // The Type Of Depth Test To Do
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);//硂︽р礶睲Θ堵︹睲埃z buffer
+void obj_display() {
 
-	glUseProgram(MyShader);
+	// 只有一个物体
+	mesh *object = globalscene->mList[0].obejct;
+	//bind texture 0
+	glActiveTexture(GL_TEXTURE0);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, globalscene->mList[0].ambTextureId);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+	glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
+	//bind texture 1
+	glActiveTexture(GL_TEXTURE1);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, globalscene->mList[0].difTextureId);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+	glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
+	//bind texture 1
+	glActiveTexture(GL_TEXTURE2);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, globalscene->mList[0].spcTextureId);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+	glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
 
-	glActiveTexture( GL_TEXTURE0 );
-	glBindTexture(GL_TEXTURE_2D, texObject[0]);
-	GLint location = glGetUniformLocation(MyShader, "colorTexture");
-	if(location == -1)
-		printf("Cant find texture name: colorTexture\n");
-	else
-		glUniform1i(location, 0);
-
-	for (size_t i=0;i < object->fTotal;i++)
+	int lastMaterial = -1;
+	for(size_t i=0;i < object->fTotal;++i)
 	{
-		glBegin(GL_POLYGON);
-		for (size_t j=0;j<3;j++)
+		// set material property if this face used different material
+		if(lastMaterial != object->faceList[i].m)
 		{
-			glMultiTexCoord2fv(GL_TEXTURE0,	object->tList[object->faceList[i][j].t].ptr);
+			lastMaterial = (int)object->faceList[i].m;
+			glMaterialfv(GL_FRONT, GL_AMBIENT  , object->mList[lastMaterial].Ka);
+			glMaterialfv(GL_FRONT, GL_DIFFUSE  , object->mList[lastMaterial].Kd);
+			glMaterialfv(GL_FRONT, GL_SPECULAR , object->mList[lastMaterial].Ks);
+			glMaterialfv(GL_FRONT, GL_SHININESS, &object->mList[lastMaterial].Ns);
+
+			//you can obtain the texture name by object->mList[lastMaterial].map_Kd
+			//load them once in the main function before mainloop
+			//bind them in display function here
+		}
+
+		glBegin(GL_TRIANGLES);
+		for (size_t j=0;j<3;++j)
+		{
+			//textex corrd. 
+			//if (globalscene->mList[i].texWay != 3)
+			glMultiTexCoord2fv(GL_TEXTURE0, object->tList[object->faceList[i][j].t].ptr);
+			glMultiTexCoord2fv(GL_TEXTURE1, object->tList[object->faceList[i][j].t].ptr);
+			glMultiTexCoord2fv(GL_TEXTURE2, object->tList[object->faceList[i][j].t].ptr);
 			glNormal3fv(object->nList[object->faceList[i][j].n].ptr);
 			glVertex3fv(object->vList[object->faceList[i][j].v].ptr);	
 		}
 		glEnd();
 	}
-
-	glutSwapBuffers();
-	glutPostRedisplay();
 }
 
-void Reshape(GLsizei w, GLsizei h)
+void reshape(GLsizei w, GLsizei h)
 {
-	WinW = w;
-	WinH = h;
+	windowSize[0] = w;
+	windowSize[1] = h;
+}
+
+
+void display() {
+	// clear the buffer
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);					// 背景color
+	glClearDepth(1.0f);										// Depth Buffer (深度z buffer) Setup
+	glEnable(GL_DEPTH_TEST);								// Enables Depth Testing
+	glDepthFunc(GL_LEQUAL);									// The Type Of Depth Test To Do
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		// 双缓冲区，z buffer
+
 	// viewport transformation
-	glViewport(0, 0, WinW,WinH);
+	glViewport(globalview->viewport[0], globalview->viewport[1], globalview->viewport[2], globalview->viewport[3]);
+
+	// projection transformation
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(globalview->fovy, (GLfloat)windowSize[0]/(GLfloat)windowSize[1], globalview->dnear, globalview->dfar);
+	// viewing and modeling transformation
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	gluLookAt(	globalview->eye[0], globalview->eye[1], globalview->eye[2],		// eye
+		globalview->vat[0], globalview->vat[1], globalview->vat[2],     // center
+		globalview->vup[0], globalview->vup[1], globalview->vup[2]);    // up
+
+	// 设置灯光效果
+	light();
+
+	for (int i = 0; i < globalscene->mTotla; i++) {
+		glPushMatrix();
+		/* 改变作图原点 */
+		glTranslatef(globalscene->mList[i].translate[0], globalscene->mList[i].translate[1], globalscene->mList[i].translate[2]);
+		/* 旋转变换 */
+		glRotated(globalscene->mList[i].rotate[0], globalscene->mList[i].rotate[1], 
+			globalscene->mList[i].rotate[2], globalscene->mList[i].rotate[3]);
+		/* 缩放 */
+		glScaled(globalscene->mList[i].scale[0], globalscene->mList[i].scale[1], globalscene->mList[i].scale[2]);
+		/* 贴图方式 */
+		obj_display();
+		//obj_display(globalscene->mList[i].obejct);
+
+		glPopMatrix();
+		glFlush();
+	}
+
+	glutSwapBuffers();
 }
