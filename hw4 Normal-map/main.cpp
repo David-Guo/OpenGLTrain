@@ -34,7 +34,7 @@ int main(int argc, char** argv)
 	glutInitWindowSize(500, 500);
 	glutInitWindowPosition(0, 0);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-	glutCreateWindow("HW1-2 Park");
+	glutCreateWindow("HW3 0440052");
 	glewExperimental=FALSE;
 	glewInit();
 
@@ -74,6 +74,7 @@ void obj_display() {
 	// 只有一个物体
 	mesh *object = globalscene->mList[0].obejct;
 	//bind texture 0
+	// glUnifor1i( 0) for colorTexture
 	glActiveTexture( GL_TEXTURE0 );
 	glBindTexture(GL_TEXTURE_2D, globalscene->mList[0].ambTextureId);
 	GLint location0 = glGetUniformLocation(MyShader, "colorTexture");
@@ -81,22 +82,24 @@ void obj_display() {
 		printf("Cant find texture name: colorTexture\n");
 	else
 		glUniform1i(location0, 0);
-	////bind texture 1
-	//glActiveTexture( GL_TEXTURE1 );
-	//glBindTexture(GL_TEXTURE_2D, globalscene->mList[0].difTextureId);
-	//GLint location1 = glGetUniformLocation(MyShader, "diffuseTex");
-	//if(location1 == -1)
-	//	printf("Cant find texture name: diffuseTex\n");
-	//else
-	//	glUniform1i(location1, 0);
-	////bind texture 2
-	//glActiveTexture( GL_TEXTURE2 );
-	//glBindTexture(GL_TEXTURE_2D, globalscene->mList[0].spcTextureId);
-	//GLint location2 = glGetUniformLocation(MyShader, "specularTex");
-	//if(location2 == -1)
-	//	printf("Cant find texture name: specularTex\n");
-	//else
-	//	glUniform1i(location2, 0);
+	//bind texture 1
+	// glUnifor1i( 1) for diffuse Texture
+	glActiveTexture( GL_TEXTURE1 );
+	glBindTexture(GL_TEXTURE_2D, globalscene->mList[0].difTextureId);
+	GLint location1 = glGetUniformLocation(MyShader, "diffuseTex");
+	if(location1 == -1)
+		printf("Cant find texture name: diffuseTex\n");
+	else
+		glUniform1i(location1, 1);
+	//bind texture 2
+	// glUnifor1i( 2) for specular Texture
+	glActiveTexture( GL_TEXTURE2 );
+	glBindTexture(GL_TEXTURE_2D, globalscene->mList[0].spcTextureId);
+	GLint location2 = glGetUniformLocation(MyShader, "specularTex");
+	if(location2 == -1)
+		printf("Cant find texture name: specularTex\n");
+	else
+		glUniform1i(location2, 2);
 
 	// 确定顶点属性的 location，算完切向量后，再设置属性值
 	tangent_loc = glGetAttribLocation(MyShader, "tangent");
@@ -140,7 +143,7 @@ void obj_display() {
 		glm::vec2 Edge2uv = UV2 - UV0;
 		// 计算切向量，副切向量
 		glm::vec3 tangent, bitangent;
-		float cp = Edge1uv.x * Edge1uv.y - Edge1uv.x * Edge2uv.y;
+		float cp = Edge1uv.x * Edge2uv.y - Edge2uv.x * Edge1uv.y;
 		if(cp != 0.0f) {
 			float mul = 1.0f /cp;
 			tangent = (Edge1 * Edge2uv.y + Edge2 * -Edge1uv.y) * mul;
@@ -155,8 +158,8 @@ void obj_display() {
 		{
 			//textex corrd. 
 			glMultiTexCoord2fv(GL_TEXTURE0, object->tList[object->faceList[i][j].t].ptr);
-			//glMultiTexCoord2fv(GL_TEXTURE1, object->tList[object->faceList[i][j].t].ptr);
-			//glMultiTexCoord2fv(GL_TEXTURE2, object->tList[object->faceList[i][j].t].ptr);
+			glMultiTexCoord2fv(GL_TEXTURE1, object->tList[object->faceList[i][j].t].ptr);
+			glMultiTexCoord2fv(GL_TEXTURE2, object->tList[object->faceList[i][j].t].ptr);
 			glNormal3fv(object->nList[object->faceList[i][j].n].ptr);
 			glVertex3fv(object->vList[object->faceList[i][j].v].ptr);	
 		}
