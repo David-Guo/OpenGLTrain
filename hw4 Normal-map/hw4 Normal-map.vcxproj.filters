@@ -52,10 +52,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="UseTexture.fs">
+    <None Include="UseTexture.vs">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="UseTexture.vs">
+    <None Include="UseTexture.frag">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

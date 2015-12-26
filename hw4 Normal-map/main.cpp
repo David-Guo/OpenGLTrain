@@ -3,19 +3,27 @@
 #include "view.h"
 #include "light.h"
 #include "glut.h"
+#include "ShaderLoader.h"
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+
 
 view *globalview;
 lightsrc *globalight;
 scene *globalscene;
+GLhandleARB	MyShader;
+int windowSize[2];
+float rot_y = 0.0f;
+float rot_x = 0.0f;
+GLint tangent_loc, bitangent_loc;
 
 void light();
 void display();
 void reshape(GLsizei , GLsizei );
 void obj_display(mesh *object);
-int windowSize[2];
-float rot_y = 0.0f;
-float rot_x = 0.0f;
+void LoadShaders();
 void keyboard(unsigned char , int, int);
+void computeTangenBasis();
 
 int main(int argc, char** argv)
 {
@@ -31,6 +39,8 @@ int main(int argc, char** argv)
 	glewInit();
 
 	globalscene = new scene("Scene3.scene");
+
+	LoadShaders();
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
 	glutKeyboardFunc(keyboard);
@@ -64,23 +74,33 @@ void obj_display() {
 	// 只有一个物体
 	mesh *object = globalscene->mList[0].obejct;
 	//bind texture 0
-	glActiveTexture(GL_TEXTURE0);
-	glEnable(GL_TEXTURE_2D);
+	glActiveTexture( GL_TEXTURE0 );
 	glBindTexture(GL_TEXTURE_2D, globalscene->mList[0].ambTextureId);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
-	glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
-	//bind texture 1
-	glActiveTexture(GL_TEXTURE1);
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, globalscene->mList[0].difTextureId);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
-	glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
-	//bind texture 2
-	glActiveTexture(GL_TEXTURE2);
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, globalscene->mList[0].spcTextureId);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
-	glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
+	GLint location0 = glGetUniformLocation(MyShader, "colorTexture");
+	if(location0 == -1)
+		printf("Cant find texture name: colorTexture\n");
+	else
+		glUniform1i(location0, 0);
+	////bind texture 1
+	//glActiveTexture( GL_TEXTURE1 );
+	//glBindTexture(GL_TEXTURE_2D, globalscene->mList[0].difTextureId);
+	//GLint location1 = glGetUniformLocation(MyShader, "diffuseTex");
+	//if(location1 == -1)
+	//	printf("Cant find texture name: diffuseTex\n");
+	//else
+	//	glUniform1i(location1, 0);
+	////bind texture 2
+	//glActiveTexture( GL_TEXTURE2 );
+	//glBindTexture(GL_TEXTURE_2D, globalscene->mList[0].spcTextureId);
+	//GLint location2 = glGetUniformLocation(MyShader, "specularTex");
+	//if(location2 == -1)
+	//	printf("Cant find texture name: specularTex\n");
+	//else
+	//	glUniform1i(location2, 0);
+
+	// 确定顶点属性的 location，算完切向量后，再设置属性值
+	tangent_loc = glGetAttribLocation(MyShader, "tangent");
+	bitangent_loc = glGetAttribLocation(MyShader, "bitangent");
 
 	int lastMaterial = -1;
 	for(size_t i=0;i < object->fTotal;++i)
@@ -99,13 +119,44 @@ void obj_display() {
 			//bind them in display function here
 		}
 
+		// 取得三个顶点 p0 p1 p2 坐标
+		float *vertex0 = object->vList[object->faceList[i][0].v].ptr;
+		float *vertex1 = object->vList[object->faceList[i][1].v].ptr;
+		float *vertex2 = object->vList[object->faceList[i][2].v].ptr;
+		glm::vec3 p0(vertex0[0], vertex0[1], vertex0[2]);
+		glm::vec3 p1(vertex1[0], vertex1[1], vertex1[2]);
+		glm::vec3 p2(vertex2[0], vertex2[1], vertex2[2]);
+		// 取得贴图三点 对应贴图坐标
+		float *texture0 = object->tList[object->faceList[i][0].t].ptr;
+		float *texture1 = object->tList[object->faceList[i][1].t].ptr;
+		float *texture2 = object->tList[object->faceList[i][2].t].ptr;
+		glm::vec2 UV0(texture0[0], texture0[1]);
+		glm::vec2 UV1(texture1[0], texture1[1]);
+		glm::vec2 UV2(texture2[0], texture2[1]);
+		// 得到两边
+		glm::vec3 Edge1 = p1 - p0;
+		glm::vec3 Edge2 = p2 - p0;
+		glm::vec2 Edge1uv = UV1 - UV0;
+		glm::vec2 Edge2uv = UV2 - UV0;
+		// 计算切向量，副切向量
+		glm::vec3 tangent, bitangent;
+		float cp = Edge1uv.x * Edge1uv.y - Edge1uv.x * Edge2uv.y;
+		if(cp != 0.0f) {
+			float mul = 1.0f /cp;
+			tangent = (Edge1 * Edge2uv.y + Edge2 * -Edge1uv.y) * mul;
+			bitangent = (Edge1 * -Edge2uv.x + Edge2 * Edge1uv.x) * mul;
+		}
+		// specify the value of a generic vertex attribute 设置顶点属性
+		glVertexAttrib3f(tangent_loc, tangent.x, tangent.y, tangent.z);
+		glVertexAttrib3f(bitangent_loc, bitangent.x, bitangent.y, bitangent.z);
+
 		glBegin(GL_TRIANGLES);
 		for (size_t j=0;j<3;++j)
 		{
 			//textex corrd. 
 			glMultiTexCoord2fv(GL_TEXTURE0, object->tList[object->faceList[i][j].t].ptr);
-			glMultiTexCoord2fv(GL_TEXTURE1, object->tList[object->faceList[i][j].t].ptr);
-			glMultiTexCoord2fv(GL_TEXTURE2, object->tList[object->faceList[i][j].t].ptr);
+			//glMultiTexCoord2fv(GL_TEXTURE1, object->tList[object->faceList[i][j].t].ptr);
+			//glMultiTexCoord2fv(GL_TEXTURE2, object->tList[object->faceList[i][j].t].ptr);
 			glNormal3fv(object->nList[object->faceList[i][j].n].ptr);
 			glVertex3fv(object->vList[object->faceList[i][j].v].ptr);	
 		}
@@ -144,6 +195,9 @@ void display() {
 
 	// 设置灯光效果
 	light();
+
+	// 加载 MyShader 句柄
+	glUseProgram(MyShader);
 
 	for (int i = 0; i < globalscene->mTotla; i++) {
 		glPushMatrix();
@@ -199,4 +253,19 @@ void keyboard(unsigned char key, int x, int y)
 	case 27:     exit(0);
 	}
 	glutPostRedisplay();
+}
+
+void LoadShaders()
+{
+	MyShader = glCreateProgram();
+	if(MyShader != 0)
+	{
+		ShaderLoad(MyShader, "../UseTexture.vs", GL_VERTEX_SHADER);
+		ShaderLoad(MyShader, "../UseTexture.frag", GL_FRAGMENT_SHADER);
+	}
+}
+
+void computeTangenBasis()
+{
+	mesh *object = globalscene->mList[0].obejct;
 }

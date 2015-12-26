@@ -94,7 +94,7 @@
     <ClInclude Include="view.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="UseTexture.fs" />
+    <None Include="UseTexture.frag" />
     <None Include="UseTexture.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
